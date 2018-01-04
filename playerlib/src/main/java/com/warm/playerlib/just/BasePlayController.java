@@ -22,6 +22,8 @@ public abstract class BasePlayController extends FrameLayout {
 
     private int seekSpeed = 25;
 
+    private boolean live;
+
     public static final int STATE_NO_FULL = 0;
     public static final int STATE_FULL = 1;
 
@@ -36,6 +38,13 @@ public abstract class BasePlayController extends FrameLayout {
      */
     private boolean controllerShow = true;
 
+    public boolean isLive() {
+        return live;
+    }
+
+    public void setLive(boolean live) {
+        this.live = live;
+    }
 
     public void setControl(PlayControl playControl) {
         this.mPlayer = playControl;
@@ -77,14 +86,18 @@ public abstract class BasePlayController extends FrameLayout {
 
     public final void start() {
         mPlayer.start();
-        post(progressRunnable);
+        if (!live) {
+            post(progressRunnable);
+        }
 
     }
 
 
     public final void pauseUser() {
         mPlayer.pauseUser();
-        removeCallbacks(progressRunnable);
+        if (!live) {
+            removeCallbacks(progressRunnable);
+        }
     }
 
     /**
@@ -147,6 +160,7 @@ public abstract class BasePlayController extends FrameLayout {
 
 
     public final long getDuration() {
+
         return mPlayer.getDuration();
     }
 
@@ -156,8 +170,9 @@ public abstract class BasePlayController extends FrameLayout {
     }
 
     public final void seekTo(long seekTo) {
-//        player.pauseUser();
-        mPlayer.seekTo(seekTo);
+        if (!live) {
+            mPlayer.seekTo(seekTo);
+        }
     }
 
     public boolean isFull() {
@@ -208,14 +223,29 @@ public abstract class BasePlayController extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        Log.d("####", "onAttachedToWindow: ");
         post(progressRunnable);
+
+
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Log.d("####", "onDetachedFromWindow: ");
+
+        removeCallbacks(progressRunnable);
     }
 
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
+        Log.d("####", "onWindowVisibilityChanged: "+visibility);
+
         if (visibility == VISIBLE) {
             post(progressRunnable);
+        }else {
+            removeCallbacks(progressRunnable);
         }
     }
 

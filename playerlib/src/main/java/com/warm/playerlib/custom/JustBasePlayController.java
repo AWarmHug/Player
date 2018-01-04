@@ -61,6 +61,15 @@ public class JustBasePlayController extends BasePlayController implements Bottom
     }
 
     @Override
+    public void setLive(boolean live) {
+        super.setLive(live);
+        if (live){
+
+        }
+
+    }
+
+    @Override
     protected int getLayoutRes() {
         return R.layout.controller_play;
     }

@@ -20,11 +20,11 @@ import master.flame.danmaku.danmaku.model.android.DanmakuContext;
 import master.flame.danmaku.danmaku.model.android.Danmakus;
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
 
-public class PlayerActivity extends AppCompatActivity {
+public class PlayerActivity extends AppCompatActivity implements View.OnClickListener {
     public static final String LIVE_URL = "http://flashmedia.eastday.com/newdate/news/2016-11/shznews1125-19.mp4";
     //    public static final String LIVE_URL="http://zv.3gv.ifeng.com/live/zhongwen800k.m3u8";
     private JustVideoPlayer videoView;
-    private Button button;
+    private Button danma, scale;
     private List<Integer> scaleType;
     private int i;
 
@@ -36,7 +36,8 @@ public class PlayerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_player);
 
         videoView = (JustVideoPlayer) findViewById(R.id.videoView);
-        button = (Button) findViewById(R.id.button);
+        danma = (Button) findViewById(R.id.danma);
+        scale = (Button) findViewById(R.id.scale);
 
         scaleType = new ArrayList<>();
         scaleType.add(JustVideoPlayer.SCALE_WRAP_CONTENT);
@@ -44,6 +45,29 @@ public class PlayerActivity extends AppCompatActivity {
         scaleType.add(JustVideoPlayer.SCALE_4_3);
         scaleType.add(JustVideoPlayer.SCALE_16_9);
 
+        initDanma();
+
+
+        final JustBasePlayController controller = new JustBasePlayController(this);
+        controller.setLive(false);
+        videoView.setDataSource(LIVE_URL)
+//                .setAutoRotation()
+                .setDanma(mDanmaContext, new BaseDanmakuParser() {
+                    @Override
+                    protected IDanmakus parse() {
+                        return new Danmakus();
+                    }
+                })
+                .addController(controller);
+
+        danma.setOnClickListener(this);
+        scale.setOnClickListener(this);
+    }
+
+    /**
+     * 初始化弹幕
+     */
+    private void initDanma() {
         // 设置最大显示行数
         HashMap<Integer, Integer> maxLinesPair = new HashMap<>();
         maxLinesPair.put(BaseDanmaku.TYPE_SCROLL_RL, 5); // 滚动弹幕最大显示5行
@@ -58,32 +82,8 @@ public class PlayerActivity extends AppCompatActivity {
 //        .setCacheStuffer(new BackgroundCacheStuffer())  // 绘制背景使用BackgroundCacheStuffer
                 .setMaximumLines(maxLinesPair)
                 .preventOverlapping(overlappingEnablePair).setDanmakuMargin(40);
-
-
-        final JustBasePlayController controller = new JustBasePlayController(this);
-        videoView.setDataSource(LIVE_URL)
-//                .setAutoRotation()
-                .setDanma(mDanmaContext, new BaseDanmakuParser() {
-                    @Override
-                    protected IDanmakus parse() {
-                        return new Danmakus();
-                    }
-                })
-                .addController(controller);
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                controller.setScaleType(scaleType.get(i));
-                i++;
-                if (i == 4) {
-                    i = 0;
-                }
-                String danma = "弹幕" + i;
-                videoView.addDanma(createDanmaku(true, danma));
-            }
-        });
     }
+
 
     @Override
     protected void onPause() {
@@ -124,5 +124,19 @@ public class PlayerActivity extends AppCompatActivity {
         danmaku.textColor = Color.WHITE;
         return danmaku;
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.danma:
+                videoView.addDanma(createDanmaku(true, "弹幕~~~~~~~~"));
+                break;
+            case R.id.scale:
+                if (i == 4) i = 0;
+                videoView.setScaleType(scaleType.get(i));
+                i++;
+                break;
+        }
     }
 }

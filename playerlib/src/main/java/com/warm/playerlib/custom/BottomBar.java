@@ -77,6 +77,13 @@ public class BottomBar extends FrameLayout implements SeekBar.OnSeekBarChangeLis
         mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
     }
 
+    public void setLive(){
+        bt_play.setVisibility(INVISIBLE);
+        bt_play.setVisibility(INVISIBLE);
+
+
+    }
+
     /**
      * dismiss只显示一个seekbar
      */
